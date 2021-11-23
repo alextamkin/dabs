@@ -1,0 +1,7 @@
+# @package _group_
+loss: cross_entropy
+metric: accuracy
+
+name: vgg_flower
+batch_size: 64
+num_workers: 4

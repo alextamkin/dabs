@@ -1,0 +1,22 @@
+[tool.isort]
+py_version = '37'
+order_by_type = false  # do not discern between constants, classes, and methods since some dataset classes look like constants
+multi_line_output = 5
+known_first_party = ['src']
+known_third_party = ['datasets']  # to avoid confusion with src/datasets
+line_length = 127
+
+[tool.yapf]
+based_on_style = 'google'
+column_limit = 127
+
+# behavior when things can't fit on one line: start new line with args
+split_before_first_argument = true
+split_before_expression_after_opening_paren = true  # puts all args on newline after opening paren
+dedent_closing_brackets = true                      # closing bracket is dedented on newline after args
+
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 127
+disable = 'all'
+enable = 'unused-variable,unused-import'  # only use pylint for linting unused stuff
+ignore = 'logs,data'

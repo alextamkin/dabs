@@ -1,0 +1,7 @@
+# @package _group_
+loss: binary_cross_entropy
+metric: accuracy
+
+name: sst2
+batch_size: 128
+num_workers: 4

@@ -1,0 +1,7 @@
+# @package _group_
+loss: binary_cross_entropy
+metric: auroc
+
+name: xray8
+batch_size: 64
+num_workers: 8
