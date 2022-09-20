@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from copy import deepcopy
 
 from PIL import Image
 from torch.utils.data import Dataset
@@ -46,9 +47,6 @@ class MSCOCO(Dataset):
         self.train = train
         self.root = os.path.join(base_root, 'captioned_images', 'mscoco')
 
-        if not os.path.isdir(self.root):
-            os.makedirs(self.root)
-
         if download:
             self.download_dataset()
 
@@ -58,12 +56,18 @@ class MSCOCO(Dataset):
         if not self._is_downloaded():
             raise RuntimeError('Dataset not found. You can use download=True to download it')
 
-        annotations, coco_cat_id_to_label = self.load_coco()
-        paths, bboxes, labels, captions = self.load_images(annotations, coco_cat_id_to_label)
-        self.paths = paths
-        self.bboxes = bboxes
-        self.labels = labels
-        self.captions = captions
+        image_dir_name = ('train2017' if self.train else 'val2017')
+        image_dir = os.path.join(self.root, image_dir_name)
+
+        captions, labels, coco_cat_id_to_label = self.load_coco()
+        self.paths, self.captions, self.labels = [], [], []
+        for image_id in captions.keys():
+            if image_id in labels:
+                self.paths.append(os.path.join(image_dir, '%012d.jpg' % image_id))
+                self.captions.append(captions[image_id])
+                self.labels.append(labels[image_id])
+
+        self.coco_cat_id_to_label = coco_cat_id_to_label  # not needed, but maps original classes to enumerated ones
 
     def _is_downloaded(self) -> bool:
         return (os.path.exists(self.root))
@@ -74,7 +78,10 @@ class MSCOCO(Dataset):
         if self._is_downloaded():
             return
 
-        # download and extract files
+        if not os.path.isdir(self.root):
+            os.makedirs(self.root)
+
+        # Download and extract files
         print('Downloading and Extracting...')
 
         for _, urls in self.DATASET_RESOURCES['mscoco'].items():
@@ -98,69 +105,21 @@ class MSCOCO(Dataset):
 
         with open(annotation_path, 'r') as json_file:
             annotations = json.load(json_file)
-            instance_annotations = annotations['annotations']
             categories = annotations['categories']
 
         category_ids = [cat['id'] for cat in categories]
         coco_cat_id_to_label = dict(zip(category_ids, range(len(categories))))
 
-        # Add captions to instance annotations.
+        label_annotations = {}
+        for annotation in annotations['annotations']:
+            label_annotations[annotation['image_id']] = coco_cat_id_to_label[annotation['category_id']]
+
+        # Load in captions and labels
         with open(caption_path, 'r') as json_file:
             captions = json.load(json_file)['annotations']
             caption_annotations = {c['image_id']: c['caption'] for c in captions}
-            for annotation in instance_annotations:
-                annotation['caption'] = caption_annotations[annotation['image_id']]
 
-        return instance_annotations, coco_cat_id_to_label
-
-    def load_images(self, annotations, coco_cat_id_to_label):
-        image_dir_name = ('train2017' if self.train else 'val2017')
-        image_dir = os.path.join(self.root, image_dir_name)
-        all_filepaths, all_bboxes, all_labels, all_captions = [], [], [], []
-        for anno in annotations:
-            image_id = anno['image_id']
-            image_path = os.path.join(image_dir, '%012d.jpg' % image_id)
-            bbox = anno['bbox']
-            coco_class_id = anno['category_id']
-            label = coco_cat_id_to_label[coco_class_id]
-            caption = anno['caption']
-            all_filepaths.append(image_path)
-            all_bboxes.append(bbox)
-            all_labels.append(label)
-            all_captions.append(caption)
-
-        return all_filepaths, all_bboxes, all_labels, all_captions
-
-    def handle_bboxes(self, image: Image, bbox):
-        image_w, image_h = image.size
-
-        def scale_box(bbox, scale_ratio):
-            x, y, w, h = bbox
-            x = x - 0.5 * w * (scale_ratio - 1.0)
-            y = y - 0.5 * h * (scale_ratio - 1.0)
-            w = w * scale_ratio
-            h = h * scale_ratio
-            return [x, y, w, h]
-
-        x, y, w, h = scale_box(bbox, self.BOX_SCALE_RATIO)
-        # Convert half-integer to full-integer representation.
-        # The Python Imaging Library uses a Cartesian pixel coordinate system,
-        # with (0,0) in the upper left corner. Note that the coordinates refer
-        # to the implied pixel corners; the centre of a pixel addressed as
-        # (0, 0) actually lies at (0.5, 0.5). Since COCO uses the later
-        # convention and we use PIL to crop the image, we need to convert from
-        # half-integer to full-integer representation.
-        xmin = max(int(round(x - 0.5)), 0)
-        ymin = max(int(round(y - 0.5)), 0)
-        xmax = min(int(round(x + w - 0.5)) + 1, image_w)
-        ymax = min(int(round(y + h - 0.5)) + 1, image_h)
-        image_crop = image.crop((xmin, ymin, xmax, ymax))
-        crop_width, crop_height = image_crop.size
-
-        if crop_width <= 0 or crop_height <= 0:
-            raise ValueError('crops are not valid.')
-
-        return image_crop
+        return caption_annotations, label_annotations, coco_cat_id_to_label
 
     def __len__(self):
         return len(self.paths)
@@ -231,7 +190,7 @@ class MismatchedCaption(MSCOCO):
         new_indices = orig_indices[roll_length:] + orig_indices[:roll_length]
 
         # Reassign captions.
-        captions_copy = self.captions[:]  # copy here to avoid overwriting originals
+        captions_copy = deepcopy(self.captions)  # deepcopy here to avoid overwriting originals
         for orig_index, new_index in zip(orig_indices, new_indices):
             self.captions[orig_index] = captions_copy[new_index]
 
