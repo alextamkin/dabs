@@ -29,7 +29,8 @@ class MSCOCO(Dataset):
     IN_CHANNELS = 3
 
     SEQ_LEN = 32
-    VOCAB_SIZE = 30522  # AutoTokenizer.from_pretrained('bert-base-uncased').vocab_size
+    # AutoTokenizer.from_pretrained('bert-base-uncased').vocab_size
+    VOCAB_SIZE = 30522
 
     DATASET_RESOURCES = {
         'mscoco':
@@ -67,7 +68,8 @@ class MSCOCO(Dataset):
                 self.captions.append(captions[image_id])
                 self.labels.append(labels[image_id])
 
-        self.coco_cat_id_to_label = coco_cat_id_to_label  # not needed, but maps original classes to enumerated ones
+        # not needed, but maps original classes to enumerated ones
+        self.coco_cat_id_to_label = coco_cat_id_to_label
 
     def _is_downloaded(self) -> bool:
         return (os.path.exists(self.root))
@@ -190,7 +192,8 @@ class MismatchedCaption(MSCOCO):
         new_indices = orig_indices[roll_length:] + orig_indices[:roll_length]
 
         # Reassign captions.
-        captions_copy = deepcopy(self.captions)  # deepcopy here to avoid overwriting originals
+        # deepcopy here to avoid overwriting originals
+        captions_copy = deepcopy(self.captions)
         for orig_index, new_index in zip(orig_indices, new_indices):
             self.captions[orig_index] = captions_copy[new_index]
 

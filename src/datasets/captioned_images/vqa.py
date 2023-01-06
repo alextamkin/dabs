@@ -70,7 +70,8 @@ class VQA(VisionDataset):
     IN_CHANNELS = 3
 
     SEQ_LEN = 32
-    VOCAB_SIZE = 30522  # AutoTokenizer.from_pretrained('bert-base-uncased').vocab_size
+    # AutoTokenizer.from_pretrained('bert-base-uncased').vocab_size
+    VOCAB_SIZE = 30522
 
     def __init__(self, base_root: str, download: bool = False, train: bool = True) -> None:
         self.root = os.path.join(base_root, 'captioned_images', 'vqa')
