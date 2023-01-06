@@ -2,6 +2,12 @@
 
 This repository contains the code for DABS, a benchmark for domain-agnostic self-supervised learning algorithms. The basic components of the benchmark can be found in [datasets](#datasets), [encoders](#encoders), and [algorithms](#pretraining-algorithms). Training is implemented with the [PyTorch Lightning](https://www.pytorchlightning.ai/) framework, logging with [Weights and Biases](https://wandb.ai/), and configuration management with [Hydra](https://hydra.cc/).
 
+## Updates
+
+**Jan 2023**
+* Fixed a bug in the Captioned Images domain (MSCOCO and VQA). Please rerun pretraining and transfer for this domain if you've used it previously. Numbers for this domain have been updated in the repo and paper.
+* Incorporated a patch for [CVE-2007-4559](https://github.com/advisories/GHSA-gw9q-c7gh-j9vm), a vulnerability in Python's tarfile package.
+
 ## Usage
 We provide support for Python >= 3.7. Install requirements with
 ```bash
@@ -20,7 +26,7 @@ Almost all datasets will download automatically when the dataset class is instan
 
 | Pretraining Dataset (unlabeled) | Transfer Dataset (labeled) |
 |:-----------------|:-----------------|
-| [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) | [Aircraft](https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/), [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html), [CU Birds](http://www.vision.caltech.edu/visipedia/CUB-200.html), [DTD](https://www.robots.ox.ac.uk/~vgg/data/dtd/), [Traffic Sign](https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/published-archive.html), [VGG Flower](https://www.robots.ox.ac.uk/~vgg/data/flowers/) |
+| [ImageNet](https://image-net.org/challenges/LSVRC/2012/2012-downloads.php) | [Aircraft](https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/), [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html), [CU Birds](http://www.vision.caltech.edu/visipedia/CUB-200.html), [DTD](https://www.robots.ox.ac.uk/~vgg/data/dtd/), [Traffic Sign](https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/published-archive.html), [VGG Flower](https://www.robots.ox.ac.uk/~vgg/data/flowers/) |
 | [PAMAP2](https://archive.ics.uci.edu/ml/datasets/pamap2+physical+activity+monitoring) | [PAMAP2](https://archive.ics.uci.edu/ml/datasets/pamap2+physical+activity+monitoring) |
 | [MSCOCO](https://cocodataset.org/#home) | [MSCOCO](https://cocodataset.org/#home) (mismatched detection), [VQA](https://visualqa.org/vqa_v1_download.html) (Binary classification)  |
 | [Wikitext-103](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/) | [GLUE](https://gluebenchmark.com/) (10 Tasks)  |
@@ -110,7 +116,8 @@ Below are results for algorithms trained on each dataset in DABS. The baseline p
 | ImageNet          | Traffic Sign           | Transformer | 14.33%               | **65.07%**          | 27.51%           |
 | ImageNet          | Aircraft               | Transformer | 2.70%                | **10.15%**          | 5.60%            |
 | PAMAP2           | PAMAP2                 | Transformer | 69.81%               | 	79.48%              | **88.69%**           |
-| MSCOCO           | VQA                    | Transformer | **57.50%**           | 48.90%              | 54.30%           |
+| MSCOCO           | VQA                    | Transformer | 53.38%          | **58.77%**             | 54.25%           |
+| MSCOCO           | Mismatched Caption                    | Transformer | 49.41%           | 49.86%              | **52.60%**          |
 | CheXpert         | CheXpert               | Transformer | 68.14%               | **72.40%**          | **72.40%**       |
 | CheXpert         | ChestX-ray8               | Transformer | 57.00%               | 63.00%          | **63.70%**       |
 | Wikitext-103     | GLUE (average)         | Transformer | 42.29%               | 44.08%              | **48.37%**       |
