@@ -46,7 +46,6 @@ def run_pytorch(config):
     trainer.fit(system)
 
 
-
 @hydra.main(config_path='conf', config_name='transfer')
 def run(config):
     if config.framework == 'pytorch':

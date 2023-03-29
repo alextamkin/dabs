@@ -73,7 +73,6 @@ def run_pytorch(config):
     trainer.fit(system)
 
 
-
 def print_pytorch_info():
     import torch
     import torchaudio
@@ -84,7 +83,6 @@ def print_pytorch_info():
     print(f'   - [torchvision] {torchvision.__version__}')
     print(f'   - [torchaudio]  {torchaudio.__version__}')
     print('=' * len(header))
-
 
 
 @hydra.main(config_path='conf', config_name='pretrain')
