@@ -95,6 +95,13 @@ class ChestXray8(VisionDataset):
         print('Downloading images...')
         for i, link in enumerate(CHEST_XRAY_8_LINKS):
             download_and_extract_archive(link, download_root=self.root, filename='chestxray8_images_{}.tar.gz'.format(i))
+
+        # TODO: Error
+        # This no longer downloads the metadata link correctly
+        # It downloads the webpage. We want the associated csv file.
+        # Temporary fix: download on your local machine from with this website
+        # and then scp it to the root dir
+        # https://nihcc.app.box.com/v/ChestXray-NIHCC/file/219760887468
         download_url(CHEST_XRAY_8_METADATA_LINK, self.root, filename='metadata.csv')
 
     @staticmethod

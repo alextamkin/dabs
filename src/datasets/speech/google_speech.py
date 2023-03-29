@@ -1,4 +1,5 @@
 import os
+import pathlib
 import random
 
 import librosa
@@ -17,7 +18,7 @@ GOOGLESPEECH_STDEV = [19.151]
 GOOGLESPEECH_LABELS = [
     'eight', 'right', 'happy', 'three', 'yes', 'up', 'no', 'stop', 'on', 'four', 'nine', 'zero', 'down', 'go', 'six', 'two',
     'left', 'five', 'off', 'seven', 'one', 'cat', 'bird', 'marvin', 'wow', 'tree', 'dog', 'sheila', 'bed', 'house', 'follow',
-    'visual', 'backward', 'forward', 'learn'
+    'visual', 'backward', 'forward', 'learn', '_background_noise_'
 ]
 
 
@@ -68,7 +69,7 @@ class GoogleSpeechCommands(Dataset):
 
         # download and extract files
         print('Downloading and Extracting...')
-
+        pathlib.Path(self.root).mkdir(exist_ok=True, parents=True)
         filename = GOOGLESPEECH_RESOURCES['google_speech'].rpartition('/')[2]
         download_and_extract_archive(GOOGLESPEECH_RESOURCES['google_speech'], download_root=self.root, filename=filename)
 
@@ -94,8 +95,8 @@ class GoogleSpeechCommands(Dataset):
 
         hop_length_dict = {224: 672, 112: 1344, 64: 2360, 32: 4800}
         spectrum = librosa.feature.melspectrogram(
-            padded,
-            sample_rate,
+            y=padded,
+            sr=sample_rate,
             hop_length=hop_length_dict[self.INPUT_SIZE[0]],
             n_mels=self.INPUT_SIZE[0],
         )

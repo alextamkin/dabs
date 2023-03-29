@@ -85,8 +85,8 @@ class VoxCeleb1(Dataset):
 
         hop_length_dict = {224: 672, 112: 1344, 64: 2360, 32: 4800}
         spectrum = librosa.feature.melspectrogram(
-            padded,
-            sample_rate,
+            y=padded,
+            sr=sample_rate,
             hop_length=hop_length_dict[self.INPUT_SIZE[0]],
             n_mels=self.INPUT_SIZE[0],
         )

@@ -1,5 +1,7 @@
 import os
 
+import numpy as np
+
 from src.datasets.specs import InputTokensSpec
 from src.datasets.text.utils import EnglishHuggingFaceDataset
 
@@ -24,7 +26,7 @@ class WikiText103(EnglishHuggingFaceDataset):
 
     def __getitem__(self, index):
         index, text = super().__getitem__(index)
-        dummy_label = 0
+        dummy_label = np.array(0)
         return index, text, dummy_label
 
     @staticmethod

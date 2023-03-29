@@ -70,8 +70,7 @@ class VQA(VisionDataset):
     IN_CHANNELS = 3
 
     SEQ_LEN = 32
-    # AutoTokenizer.from_pretrained('bert-base-uncased').vocab_size
-    VOCAB_SIZE = 30522
+    VOCAB_SIZE = 30522  # AutoTokenizer.from_pretrained('bert-base-uncased').vocab_size
 
     def __init__(self, base_root: str, download: bool = False, train: bool = True) -> None:
         self.root = os.path.join(base_root, 'captioned_images', 'vqa')
@@ -99,7 +98,9 @@ class VQA(VisionDataset):
 
         The Coco annotations map image ids to filenames, and the VQA questions file maps question ids to
         the question text. The VQA annotations file maps question ids and answers to image ids.
+
         The index allows us to pick a question and find both the associated image file and the question text.
+
         More details on the file formats can be found here: https://visualqa.org/download.html.
         '''
         print('Building index...')
@@ -188,6 +189,7 @@ class VQA(VisionDataset):
     def download(self) -> None:
         '''Download components from the COMPONENTS dict by name. The function checks if the components
         are already present first.
+
         Args:
             root (str): The location of the DATASETS directory
             components (Iterable[str]): The names of which components to download

@@ -1,0 +1,7 @@
+# @package _group_
+loss: cross_entropy
+metric: accuracy
+
+name: genomics_transfer_ood
+batch_size: 32
+num_workers: 4

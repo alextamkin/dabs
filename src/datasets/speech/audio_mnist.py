@@ -31,13 +31,13 @@ class AudioMNIST(Dataset):
 
     def __init__(self, base_root: str, download: bool = False, train: bool = True) -> None:
         super().__init__()
-        self.root = os.path.join(base_root, 'speech', 'AudioMNIST-master')
+        self.root = os.path.join(base_root, 'speech', 'AudioMNIST')
         self.train = train
 
         if not self._check_exists():
             raise RuntimeError(
                 '''Dataset not found. You can use git clone 'https://github.com/soerenab/AudioMNIST' to download it
-                and move using mv -t /AudioMNIST/data /DATASETS/audio_mnist'''
+                and move using mv ./AudioMNIST path_to_data_root/speech/'''
             )
 
         if train:
@@ -71,8 +71,8 @@ class AudioMNIST(Dataset):
 
         hop_length_dict = {224: 672, 112: 1344, 64: 2360, 32: 4800}
         spectrum = librosa.feature.melspectrogram(
-            padded,
-            sample_rate,
+            y=padded,
+            sr=sample_rate,
             hop_length=hop_length_dict[self.INPUT_SIZE[0]],
             n_mels=self.INPUT_SIZE[0],
         )
@@ -84,7 +84,6 @@ class AudioMNIST(Dataset):
 
         normalize = Normalize(AUDIOMNIST_MEAN, AUDIOMNIST_STDEV)
         spectrum = normalize(spectrum)
-
         return index, spectrum, int(label)
 
     def __len__(self):

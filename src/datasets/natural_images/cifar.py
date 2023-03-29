@@ -20,11 +20,9 @@ class CIFAR10(Dataset):
         if not os.path.isdir(self.root):
             os.makedirs(self.root)
         self.transforms = transforms.Compose(
-            [
-                transforms.Resize(self.INPUT_SIZE),
-                transforms.CenterCrop(self.INPUT_SIZE),
-                transforms.ToTensor(),
-            ]
+            [transforms.Resize(self.INPUT_SIZE),
+             transforms.CenterCrop(self.INPUT_SIZE),
+             transforms.ToTensor()]
         )
         self.dataset = datasets.cifar.CIFAR10(
             root=self.root,
@@ -56,6 +54,7 @@ class CIFAR10(Dataset):
 class CIFAR10Small(CIFAR10):
     INPUT_SIZE = (32, 32)
     PATCH_SIZE = (4, 4)
+    MAE_OUTPUT_SIZE = 48
 
     @staticmethod
     def spec():

@@ -3,14 +3,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchmetrics
 
-from src.systems.base_system import BaseSystem
+from src.datasets.catalog import IGNORE_INDEX_DATASETS, TOKENWISE_DATASETS
+from src.systems.pytorch.base_system import BaseSystem
 
 
 class BCEWithLogitsLoss(nn.BCEWithLogitsLoss):
     '''Wrapper around BCEWithLogits to cast labels to float before computing loss'''
 
     def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        return super().forward(input, target.float())
+        return super().forward(input, torch.reshape(target.float(), input.shape))
 
 
 def get_loss_and_metric_fns(loss, metric, num_classes):
@@ -33,6 +34,8 @@ def get_loss_and_metric_fns(loss, metric, num_classes):
         metric_fn = torchmetrics.functional.pearson_corrcoef
     elif metric == 'spearman':
         metric_fn = torchmetrics.functional.spearman_corrcoef
+    elif metric == 'F1':
+        metric_fn = torchmetrics.F1(num_classes=num_classes, average='weighted')
     else:
         raise ValueError(f'Metric name {metric} unrecognized.')
 
@@ -54,6 +57,7 @@ class TransferSystem(BaseSystem):
         # Restore checkpoint if provided.
         if config.ckpt is not None:
             self.load_state_dict(torch.load(config.ckpt)['state_dict'], strict=False)
+
         for param in self.model.parameters():
             param.requires_grad = False
 
@@ -68,7 +72,7 @@ class TransferSystem(BaseSystem):
         self.loss_fn, self.metric_fn, self.post_fn = get_loss_and_metric_fns(
             config.dataset.loss,
             config.dataset.metric,
-            self.dataset.num_classes(),
+            num_classes,
         )
         self.is_auroc = (config.dataset.metric == 'auroc')  # this metric should only be computed per epoch
 
@@ -76,7 +80,11 @@ class TransferSystem(BaseSystem):
         return self.loss_fn(*args, **kwargs)
 
     def forward(self, batch):
-        embs = self.model.forward(batch, prehead=True)
+        # TOKENWISE_DATASETS: datasets where prediction is made for each input token
+        if self.dataset_name in TOKENWISE_DATASETS:
+            embs = self.model.forward(batch, prepool=True, prehead=True)
+        else:
+            embs = self.model.forward(batch, prehead=True)
         preds = self.linear(embs)
         return preds
 
@@ -85,15 +93,25 @@ class TransferSystem(BaseSystem):
         preds = self.forward(batch)
         if self.num_classes == 1:
             preds = preds.squeeze(1)
-
+        if self.dataset_name in TOKENWISE_DATASETS:
+            preds = preds[:, 1:, :]
+            preds = (torch.transpose(preds, 1, 2))
         loss = self.objective(preds, labels)
         self.log('transfer/train_loss', loss.item(), on_step=True, on_epoch=False, prog_bar=False, sync_dist=True)
         with torch.no_grad():
             if self.is_auroc:
                 self.metric_fn.update(self.post_fn(preds.float()), labels)
+
+            # For the token-wise classification datasets, this is the pad index, which we want to ignore
+            elif self.dataset_name in IGNORE_INDEX_DATASETS:
+                metric = self.metric_fn(
+                    self.post_fn(preds.float()), labels, ignore_index=IGNORE_INDEX_DATASETS[self.dataset_name]
+                )
+                self.log('transfer/train_metric', metric, on_step=True, on_epoch=False, prog_bar=False, sync_dist=True)
             else:
                 metric = self.metric_fn(self.post_fn(preds.float()), labels)
                 self.log('transfer/train_metric', metric, on_step=True, on_epoch=False, prog_bar=False, sync_dist=True)
+
         return loss
 
     def on_train_epoch_end(self):
@@ -114,11 +132,16 @@ class TransferSystem(BaseSystem):
         preds = self.forward(batch)
         if self.num_classes == 1:
             preds = preds.squeeze(1)
-
+        if self.dataset_name in TOKENWISE_DATASETS:
+            preds = preds[:, 1:, :]
+            preds = (torch.transpose(preds, 1, 2))
         loss = self.objective(preds, labels)
         self.log('transfer/val_loss', loss.item(), on_step=False, on_epoch=True, prog_bar=False, sync_dist=True)
         if self.is_auroc:
             self.metric_fn.update(self.post_fn(preds.float()), labels)
+        elif self.dataset_name in IGNORE_INDEX_DATASETS:
+            metric = self.metric_fn(self.post_fn(preds.float()), labels, ignore_index=IGNORE_INDEX_DATASETS[self.dataset_name])
+            self.log('transfer/val_metric', metric, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
         else:
             metric = self.metric_fn(self.post_fn(preds.float()), labels)
             self.log('transfer/val_metric', metric, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)

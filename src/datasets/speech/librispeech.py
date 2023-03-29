@@ -128,8 +128,8 @@ class LibriSpeech(Dataset):
 
         hop_length_dict = {224: 672, 112: 1344, 64: 2360, 32: 4800}
         spectrum = librosa.feature.melspectrogram(
-            padded,
-            sample_rate,
+            y=padded,
+            sr=sample_rate,
             hop_length=hop_length_dict[self.INPUT_SIZE[1]],
             n_mels=self.INPUT_SIZE[0],
         )
@@ -176,6 +176,7 @@ class LibriSpeechTransfer(Dataset):
     INPUT_SIZE = (224, 224)
     PATCH_SIZE = (16, 16)
     IN_CHANNELS = 1
+    MAE_OUTPUT_SIZE = 256
 
     def __init__(self, base_root: str, download: bool = False, train: bool = True) -> None:
         super().__init__()

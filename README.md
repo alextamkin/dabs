@@ -4,16 +4,22 @@ This repository contains the code for DABS, a benchmark for domain-agnostic self
 
 ## Updates
 
+**March 2023**
+* Updated with DABS 2.0 additions:
+* 5 new domains: Proteins, Semiconductors, Particle Physics, Multispectral Satellite, Bacterial Genomics
+* 2 new algorithms: Masked Autoencoding (`mae`) and Capri / Contrastive Prediction (`contpred`)
+* Variable corruption rates via the `--corruption_rate` flag (e.g. what fraction of input tokens/patches are masked out for MAE, or shuffled for ShED)
+
 **Jan 2023**
 * Fixed a bug in the Captioned Images domain (MSCOCO and VQA). Please rerun pretraining and transfer for this domain if you've used it previously. Numbers for this domain have been updated in the repo and paper.
 * Incorporated a patch for [CVE-2007-4559](https://github.com/advisories/GHSA-gw9q-c7gh-j9vm), a vulnerability in Python's tarfile package.
 
 ## Usage
-We provide support for Python >= 3.7. Install requirements with
+We provide support for Python >= 3.8. Install requirements with
 ```bash
 python -m pip install -r requirements.txt
 ```
-For instructions on how to install PyTorch versions compatible with your CUDA versions, see [pytorch.org](https://pytorch.org/).
+For instructions on how to install PyTorch versions compatible with your CUDA versions, see [pytorch.org](https://pytorch.org/). We support Torch 1.6.0 but later versions may work as well.
 
 ### Datasets
 

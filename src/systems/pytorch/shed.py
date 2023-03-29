@@ -2,9 +2,7 @@ import numpy as np
 import torch
 import torchmetrics
 
-from src.systems.base_system import BaseSystem
-
-FRAC_TO_PERMUTE = 0.15
+from src.systems.pytorch.base_system import BaseSystem
 
 
 class ShEDSystem(BaseSystem):
@@ -19,6 +17,7 @@ class ShEDSystem(BaseSystem):
         self.ce = torch.nn.CrossEntropyLoss(reduction='none')
         self.predictor = torch.nn.Linear(self.model.emb_dim, 2)  # Predictor: replaced or not.
         self.accuracy = torchmetrics.Accuracy()
+        self.permute_frac = config.corruption_rate
 
     def forward(self, x, prehead=False):
         return self.model.forward(x, prehead=prehead)
@@ -53,18 +52,18 @@ class ShEDSystem(BaseSystem):
         return loss, acc
 
     def permute_embeddings(self, embs):
-        '''Permutes FRAC_TO_PERMUTE of embeddings within each example.
+        '''Permutes self.permute_frac of embeddings within each example.
 
         Args:
             embs: [batch_size, seq_len, emb_size] embeddings to permute
 
         Returns:
             permuted_embs: [batch_size, seq_len, emb_size] embeddings
-                with FRAC_TO_PERMUTE permuted
+                with self.permute_frac permuted
             is_permuted: [batch_size, seq_len] of ints indicating whether each token was permuted or not
 
         '''
-        num_to_permute = int(np.ceil(embs.size(1) * FRAC_TO_PERMUTE))
+        num_to_permute = int(np.ceil(embs.size(1) * self.permute_frac))
 
         # [batch_size, num_to_permute]
         indices_to_permute = torch.rand(embs.size(0), embs.size(1)).topk(dim=-1, k=num_to_permute).indices.to(self.device)

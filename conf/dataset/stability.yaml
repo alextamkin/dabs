@@ -1,0 +1,6 @@
+loss: mse
+metric: spearman
+
+name: stability
+batch_size: 128
+num_workers: 4

@@ -3,6 +3,7 @@ outputs/
 reference/
 .DS_Store
 .vscode/
+wandb*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

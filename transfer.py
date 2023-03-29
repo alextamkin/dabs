@@ -1,18 +1,21 @@
 '''Main transfer script.'''
 
+import os
+
+import flatten_dict
 import hydra
+import wandb
+
+from src.datasets.catalog import TRANSFER_DATASETS
 
 
 @hydra.main(config_path='conf', config_name='transfer')
-def run(config):
+def run_pytorch(config):
     # Deferred imports for faster tab completion
-    import os
 
-    import flatten_dict
     import pytorch_lightning as pl
 
-    from src.datasets.catalog import TRANSFER_DATASETS
-    from src.systems import transfer
+    from src.systems.pytorch import transfer
 
     pl.seed_everything(config.trainer.seed)
 
@@ -29,7 +32,7 @@ def run(config):
     trainer = pl.Trainer(
         default_root_dir=save_dir,
         logger=wandb_logger,
-        gpus=str(config.gpus),
+        gpus=[config.gpus],
         max_epochs=config.trainer.max_epochs,
         min_epochs=config.trainer.max_epochs,
         val_check_interval=config.trainer.val_check_interval,
@@ -41,6 +44,17 @@ def run(config):
 
     system = transfer.TransferSystem(config)
     trainer.fit(system)
+
+
+
+@hydra.main(config_path='conf', config_name='transfer')
+def run(config):
+    if config.framework == 'pytorch':
+        from pretrain import print_pytorch_info
+        print_pytorch_info()
+        run_pytorch(config)
+    else:
+        raise ValueError(f'Framework {config.framework} not supported.')
 
 
 if __name__ == '__main__':

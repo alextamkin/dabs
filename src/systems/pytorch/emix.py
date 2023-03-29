@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.systems.base_system import BaseSystem
+from src.systems.pytorch.base_system import BaseSystem
 
 
 class EMixSystem(BaseSystem):

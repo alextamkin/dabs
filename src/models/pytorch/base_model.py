@@ -4,7 +4,13 @@ from typing import Any, Dict, List, Sequence
 import torch
 import torch.nn as nn
 
-from src.models.embedding_modules import Input1dToEmbeddings, Input2dToEmbeddings, Input3dToEmbeddings, InputTokensToEmbeddings
+from src.models.pytorch.embedding_modules import (
+    Input1dToEmbeddings,
+    Input2dToEmbeddings,
+    Input3dToEmbeddings,
+    InputTabularToEmbeddings,
+    InputTokensToEmbeddings,
+)
 
 
 class BaseModel(ABC, nn.Module):
@@ -60,6 +66,11 @@ class BaseModel(ABC, nn.Module):
                     input_size=input_spec.input_size,
                     patch_size=input_spec.patch_size,
                     in_channels=input_spec.in_channels,
+                    embed_dim=embed_dim,
+                )
+            elif input_spec.input_type == 'tabular':
+                embedding_module = InputTabularToEmbeddings(
+                    num_features=input_spec.num_features,
                     embed_dim=embed_dim,
                 )
             else:

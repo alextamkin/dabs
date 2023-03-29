@@ -1,9 +1,13 @@
+# @package _group_
 ckpt: null
-data_root: /data2/atamkin/DATASETS
+data_root: ./DATASETS
 gpus: 0
+finetune: False
+
+framework: pytorch
 
 exp:
-  base_dir: /mnt/fs2/atamkin/domain-agnostic/models
+  base_dir: ./EXPS
   name: ???
 
 trainer:
@@ -24,3 +28,9 @@ optim:
 defaults:
   - dataset: librispeech_transfer
   - model: transformer  # used to set default model when no ckpt is passed in
+
+# Disable hydra creation of directories
+hydra:
+  output_subdir: null
+  run:
+      dir: .

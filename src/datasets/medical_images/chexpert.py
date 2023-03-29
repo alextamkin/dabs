@@ -61,6 +61,7 @@ class CheXpert(VisionDataset):
     INPUT_SIZE = (224, 224)
     PATCH_SIZE = (16, 16)
     IN_CHANNELS = 3
+    MAE_OUTPUT_SIZE = 768
 
     def __init__(self, base_root: str, download: bool = False, train: bool = True) -> None:
         self.root = os.path.join(base_root, 'medical_images', 'chexpert')
@@ -75,9 +76,9 @@ class CheXpert(VisionDataset):
         # if no data is present, prompt the user to download it
         if not any_exist(components):
             raise RuntimeError(
-                """
+                f"""
                 'Visit https://stanfordmlgroup.github.io/competitions/chexpert/ to download the data'
-                'Once you receive the download links, place the zip file in {}'.format(self.root)
+                'Once you receive the download links, place the zip file in {self.root}'
                 'To maintain compatibility with the paper baselines, download the sampled version (CheXpert-v1.0-small).'
                 """
             )
@@ -123,8 +124,11 @@ class CheXpert(VisionDataset):
         fname = self.fnames[index]
         image = Image.open(os.path.join(self.root, fname)).convert('RGB')
         image = self.TRANSFORMS(image)
+        # check if image is a numpy array
+        if not isinstance(image, np.ndarray):
+            image = image.float()
         label = torch.tensor(self.labels[index][self.CHEXPERT_LABELS_IDX]).long()
-        return index, image.float(), label
+        return index, image, label
 
     @staticmethod
     def num_classes():

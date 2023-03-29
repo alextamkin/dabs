@@ -1,0 +1,6 @@
+loss: mse
+metric: spearman
+
+name: fluorescence
+batch_size: 512
+num_workers: 4

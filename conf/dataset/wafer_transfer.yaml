@@ -1,0 +1,7 @@
+# @package _group_
+loss: cross_entropy
+metric: F1
+
+name: wafer_transfer
+batch_size: 128
+num_workers: 4

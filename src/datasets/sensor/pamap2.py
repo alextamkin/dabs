@@ -70,6 +70,7 @@ class PAMAP2(data.Dataset):
     NUM_CLASSES = 12  # NOTE: They're not contiguous labels.
     SEGMENT_SIZE = 5
     IN_CHANNELS = 52  # multiple sensor readings from different parts of the body
+    MAE_OUTPUT_SIZE = 260
 
     def __init__(self, base_root: str, download: bool = False, train: bool = True) -> None:
         super().__init__()

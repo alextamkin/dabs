@@ -7,13 +7,13 @@ from omegaconf import DictConfig
 from torch.utils.data import DataLoader, Dataset, IterableDataset
 
 from src.datasets.catalog import DATASET_DICT
-from src.models import transformer
+from src.models.pytorch.transformer import DomainAgnosticTransformer
 
 
 def get_model(config: DictConfig, dataset_class: Dataset):
     '''Retrieves the specified model class, given the dataset class.'''
     if config.model.name == 'transformer':
-        model_class = transformer.DomainAgnosticTransformer
+        model_class = DomainAgnosticTransformer
     else:
         raise ValueError(f'Encoder {config.model.name} doesn\'t exist.')
 
@@ -35,6 +35,7 @@ class BaseSystem(pl.LightningModule):
         super().__init__()
         self.config = config
         self.dataset = DATASET_DICT[config.dataset.name]
+        self.dataset_name = config.dataset.name
         self.model = get_model(config, self.dataset)
 
     @abstractmethod
@@ -103,5 +104,5 @@ class BaseSystem(pl.LightningModule):
 
     def on_train_end(self):
         model_path = os.path.join(self.trainer.checkpoint_callback.dirpath, 'model.ckpt')
-        torch.save(self, model_path)
+        torch.save(self.state_dict(), model_path)
         print(f'Pretrained model saved to {model_path}')

@@ -62,10 +62,7 @@ class Input1dToEmbeddings(nn.Module):
 
 
 class Input2dToEmbeddings(nn.Module):
-    '''Class that divides 2d inputs into 2d patches, flattens, and projects to embedding dimension.
-
-    Examples of 2d data include image and sensor data.
-    '''
+    '''Class that divides 2d inputs into 2d patches, flattens, and projects to embedding dimension.'''
 
     def __init__(
         self,
@@ -146,3 +143,30 @@ class Input3dToEmbeddings(nn.Module):
     @property
     def length(self):
         return np.prod(self.input_size) // np.prod(self.patch_size)
+
+
+class InputTabularToEmbeddings(nn.Module):
+    '''Class that embeds tabular data'''
+
+    # (batch_size, number_of_features, 1)
+    NUM_DIMS = 3
+
+    def __init__(
+        self,
+        num_features: int,
+        embed_dim: int,
+    ):
+        super().__init__()
+
+        self.num_features = num_features
+        self.embed = nn.Linear(1, embed_dim)
+
+    def forward(self, input_tabular):
+        assert input_tabular.dim() == self.NUM_DIMS
+        assert input_tabular.shape[1] == self.num_features
+        assert input_tabular.shape[2] == 1
+        return self.embed(input_tabular)
+
+    @property
+    def length(self):
+        return self.num_features

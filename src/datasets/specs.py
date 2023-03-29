@@ -54,3 +54,12 @@ class Input3dSpec(object):
         self.input_size = input_size
         self.patch_size = patch_size
         self.in_channels = in_channels
+
+
+class InputTabularSpec(object):
+    '''Defines the specs for tabular inputs.'''
+
+    input_type = 'tabular'
+
+    def __init__(self, num_features: int):
+        self.num_features = num_features

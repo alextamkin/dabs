@@ -13,6 +13,7 @@ class ImageNet(Dataset):
     INPUT_SIZE = (224, 224)
     PATCH_SIZE = (16, 16)
     IN_CHANNELS = 3
+    MAE_OUTPUT_SIZE = 768
 
     TRANSFORMS = transforms.Compose(
         [
@@ -24,7 +25,7 @@ class ImageNet(Dataset):
 
     def __init__(self, base_root: str, download: bool = False, train: bool = True) -> None:
         super().__init__()
-        self.root = '/data5/chengxuz/Dataset/imagenet_raw'
+        self.root = os.path.join(base_root, 'natural_images', 'imagenet')
         if not os.path.isdir(self.root):
             os.makedirs(self.root)
 

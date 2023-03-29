@@ -1,6 +1,13 @@
+from collections import namedtuple
+
 from src.datasets.captioned_images import mscoco, vqa
+from src.datasets.genomics import genomics
 from src.datasets.medical_images import chexpert, xray8
 from src.datasets.natural_images import aircraft, cifar, cu_birds, dtd, imagenet, traffic_sign, vgg_flower
+from src.datasets.particle_physics import higgs
+from src.datasets.proteins import fluorescence, pfam, scop, secondary_struct, stability
+from src.datasets.satellite_images import eurosat
+from src.datasets.semiconductors import wafer_map
 from src.datasets.sensor import pamap2
 from src.datasets.speech import audio_mnist, fluent_speech, google_speech, librispeech, voxceleb1
 from src.datasets.text import glue, mc4, pawsx, wikitext
@@ -64,14 +71,41 @@ DATASET_DICT = {
     'paws_zh': pawsx.PawsZH,
     'paws_ja': pawsx.PawsJA,
     'paws_ko': pawsx.PawsKO,
+
+    # Genomics.
+    'genomics': genomics.GenomicsPretrain,
+    'genomics_transfer_id': genomics.GenomicsTransferID,
+    'genomics_transfer_ood': genomics.GenomicsTransferOOD,
+
+    # Particle physics.
+    'higgs': higgs.HiggsPretrain,
+    'higgs_transfer': higgs.HiggsTransfer,
+
+    # Proteins.
+    'pfam': pfam.PfamPretrain,
+    'pfam_transfer': pfam.PfamTransfer,
+    'scop': scop.SCOP,
+    'secondary_struct': secondary_struct.SecondaryStructure,
+    'stability': stability.Stability,
+    'fluorescence': fluorescence.Fluorescence,
+
+    # Satellites.
+    'eurosat': eurosat.EurosatPretrain,
+    'eurosat_transfer': eurosat.EurosatTransfer,
+
+    # Semiconductors.
+    'wafer': wafer_map.WaferMapPretrain,
+    'wafer_transfer': wafer_map.WaferMapTransfer,
 }
 
 PRETRAINING_DATASETS = [
-    'cifar10_small', 'imagenet', 'pamap2', 'pamap2_spectrogram', 'mscoco', 'wikitext103', 'chexpert', 'librispeech', 'vqa',
-    'mc4'
+    'cifar10_small', 'imagenet', 'pamap2', 'pamap2_spectrogram', 'mscoco', 'wikitext103', 'chexpert', 'librispeech', 'mc4',
+    'genomics', 'higgs', 'pfam', 'wafer', 'eurosat'
 ]
+
 UNLABELED_DATASETS = ['wikitext103', 'librispeech', 'mc4']
-MULTILABEL_DATASETS = ['chexpert', 'vqa']
+IGNORE_INDEX_DATASETS = {'secondary_struct': 3}
+TOKENWISE_DATASETS = ['secondary_struct']
 
 TRANSFER_DATASETS = [
     # Captioned images.
@@ -127,5 +161,145 @@ TRANSFER_DATASETS = [
     'paws_de',
     'paws_zh',
     'paws_ja',
-    'paws_ko'
+    'paws_ko',
+
+    # Genomics.
+    'genomics_transfer_id',
+    'genomics_transfer_ood',
+
+    # Particle physics.
+    'higgs_transfer',
+
+    # Proteins.
+    'pfam_transfer',
+    'scop',
+    'secondary_struct',
+    'stability',
+    'fluorescence',
+
+    # Satellites.
+    'eurosat_transfer',
+
+    # Semiconductors.
+    'wafer_transfer'
 ]
+
+# template for each domain namedtuple
+
+DomainTuple = namedtuple('DomainTuple', ['pretrain', 'transfers'])
+
+PRETRAIN_TO_TRANSFER_DICT = {
+    'captioned_images':
+        DomainTuple(
+            pretrain='mscoco',
+            transfers=[
+                'mismatched_caption',
+                'vqa',
+            ],
+        ),
+    'genomics':
+        DomainTuple(
+            pretrain='genomics',
+            transfers=[
+                'genomics_transfer_id',
+                'genomics_transfer_ood',
+            ],
+        ),
+    'medical_images':
+        DomainTuple(
+            pretrain='chexpert',
+            transfers=[
+                'xray8',
+            ],
+        ),
+    'natural_images':
+        DomainTuple(pretrain='imagenet', transfers=[
+            'cifar10',
+            'aircraft',
+            'cu_birds',
+            'dtd',
+            'traffic_sign',
+            'vgg_flower',
+        ]),
+    'particle_physics':
+        DomainTuple(
+            pretrain='higgs',
+            transfers=[
+                'higgs_transfer',
+            ],
+        ),
+    'proteins':
+        DomainTuple(
+            pretrain='pfam',
+            transfers=[
+                'pfam_transfer',
+                'scop',
+                'secondary_struct',
+                'stability',
+                'fluorescence',
+            ],
+        ),
+    'satellite_images':
+        DomainTuple(
+            pretrain='eurosat',
+            transfers=[
+                'eurosat_transfer',
+            ],
+        ),
+    'semiconductors':
+        DomainTuple(
+            pretrain='wafer',
+            transfers=[
+                'wafer_transfer',
+            ],
+        ),
+    'sensor':
+        DomainTuple(
+            pretrain='pamap2',
+            transfers=[
+                'pamap2',
+            ],
+        ),
+    'speech':
+        DomainTuple(
+            pretrain='librispeech',
+            transfers=[
+                'audio_mnist',
+                'fluent_speech_location',
+                'fluent_speech_action',
+                'fluent_speech_object',
+                'google_speech',
+                'librispeech_transfer',
+                'voxceleb1',
+            ],
+        ),
+    'text':
+        DomainTuple(
+            pretrain='wikitext103',
+            transfers=[
+                'cola',
+                'mnli_matched',
+                'mnli_mismatched',
+                'mrpc',
+                'qnli',
+                'qqp',
+                'rte',
+                'sst2',
+                'stsb',
+                'wnli',
+            ],
+        ),
+    'multi_text':
+        DomainTuple(
+            pretrain='mc4',
+            transfers=[
+                'paws_en',
+                'paws_fr',
+                'paws_es',
+                'paws_de',
+                'paws_zh',
+                'paws_ja',
+                'paws_ko',
+            ],
+        ),
+}

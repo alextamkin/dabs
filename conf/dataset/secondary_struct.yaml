@@ -1,0 +1,6 @@
+loss: cross_entropy
+metric: accuracy
+
+name: secondary_struct
+batch_size: 128
+num_workers: 4
