@@ -8,7 +8,7 @@ class SCOP(ProteinTransfer):
     DATASET_RESOURCES = {
         'raw_data': 'http://s3.amazonaws.com/songlabdata/proteindata/data_raw_pytorch/remote_homology.tar.gz',
         'directory': 'remote_homology',
-        'train_json': 'remote_homology_valid.json',
+        'train_json': 'remote_homology_train.json',
         'val_json': 'remote_homology_valid.json'
     }
 
