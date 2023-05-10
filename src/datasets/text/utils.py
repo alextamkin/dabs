@@ -20,7 +20,7 @@ class EnglishHuggingFaceDataset(Dataset):
 
     TOKENIZER = 'bert-base-uncased'
     SEQ_LEN = 128
-    VOCAB_SIZE = 35022  # AutoTokenizer.from_pretrained('bert-base-uncased').vocab_size
+    VOCAB_SIZE = 30522  # AutoTokenizer.from_pretrained('bert-base-uncased').vocab_size
 
     def __init__(
         self,
