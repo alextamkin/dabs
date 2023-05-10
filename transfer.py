@@ -4,7 +4,6 @@ import os
 
 import flatten_dict
 import hydra
-import wandb
 
 from src.datasets.catalog import TRANSFER_DATASETS
 
